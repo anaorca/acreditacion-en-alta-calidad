@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigator Challenge: Evaluación Módulo 1</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #f2c314;
+            --primary-dark: #d4ab10;
+            --bg-dark: #111827;
+            --card-bg: #1f2937;
+            --text-light: #f3f4f6;
+            --text-muted: #9ca3af;
+            --success: #10b981;
+            --error: #ef4444;
+            --blue: #60a5fa;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid #374151;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(242, 195, 20, 0.1);
+            color: var(--primary);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+            border: 1px solid var(--primary);
+        }
+
+        h1 {
+            font-size: 28px;
+            margin: 0;
+            color: #ffffff;
+        }
+
+        .scenario-box {
+            background: #111827;
+            padding: 24px;
+            border-radius: 16px;
+            border-left: 4px solid var(--blue);
+            margin-bottom: 30px;
+        }
+
+        .scenario-title {
+            color: var(--blue);
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .question-card {
+            display: none;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        .question-card.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .question-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .options {
+            display: grid;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 16px 20px;
+            background: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .option:hover {
+            border-color: var(--primary);
+            background: rgba(242, 195, 20, 0.05);
+        }
+
+        .option.selected {
+            border-color: var(--primary);
+            background: rgba(242, 195, 20, 0.1);
+        }
+
+        .option-circle {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #4b5563;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .option.selected .option-circle {
+            border-color: var(--primary);
+            background: var(--primary);
+            box-shadow: inset 0 0 0 3px var(--card-bg);
+        }
+
+        .footer {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-next {
+            background: var(--primary);
+            color: #111827;
+            padding: 12px 32px;
+            border-radius: 12px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+
+        .btn-next:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-next:disabled {
+            background: #4b5563;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Results Screen */
+        .results-screen {
+            text-align: center;
+            display: none;
+        }
+
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 8px solid var(--primary);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 24px;
+        }
+
+        .score-num {
+            font-size: 36px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .score-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .status-badge {
+            padding: 8px 24px;
+            border-radius: 30px;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 24px;
+        }
+
+        .status-pass { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
+        .status-fail { background: rgba(239, 68, 68, 0.2); color: var(--error); border: 1px solid var(--error); }
+
+        .feedback-box {
+            background: #111827;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: left;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="quizContainer">
+    <div class="header">
+        <span class="badge">Acreditación Aprendizaje</span>
+        <h1>Navigator Challenge</h1>
+    </div>
+
+    <!-- Escenario -->
+    <div class="scenario-box" id="scenarioBox">
+        <div class="scenario-title">
+            <span>📍 Escenario Técnico</span>
+        </div>
+        <p style="margin:0; font-size:15px; line-height:1.6;">
+            La <strong>Universidad de la Excelencia</strong> desea acreditar su Facultad de Ciencias bajo el nuevo marco de <strong>Acreditación de Unidades Académicas</strong>. Actualmente, la facultad cuenta con un presupuesto autónomo y el 40% de sus programas ya están acreditados en alta calidad. Su meta es radicar el proceso este semestre.
+        </p>
+    </div>
+
+    <!-- Pregunta 1 -->
+    <div class="question-card active" id="q1">
+        <div class="question-text">1. ¿Ante qué organismo debe radicar la Institución la carta de intención y el Informe de Autoevaluación para iniciar este proceso?</div>
+        <div class="options">
+            <div class="option" onclick="selectOption(this, 1, 'A')">
+                <div class="option-circle"></div>
+                <span>CONACES (Sala de Instituciones)</span>
+            </div>
+            <div class="option" onclick="selectOption(this, 1, 'B')">
+                <div class="option-circle"></div>
+                <span>CNA (Consejo Nacional de Acreditación)</span>
+            </div>
+            <div class="option" onclick="selectOption(this, 1, 'C')">
+                <div class="option-circle"></div>
+                <span>MEN (Despacho del Viceministro)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pregunta 2 -->
+    <div class="question-card" id="q2">
+        <div class="question-text">2. ¿Cuál es el marco normativo del CESU que define los requisitos de elegibilidad técnico-administrativa para la acreditación de Unidades Académicas en 2025?</div>
+        <div class="options">
+            <div class="option" onclick="selectOption(this, 2, 'A')">
+                <div class="option-circle"></div>
+                <span>Decreto 1330 de 2019</span>
+            </div>
+            <div class="option" onclick="selectOption(this, 2, 'B')">
+                <div class="option-circle"></div>
+                <span>Acuerdo 02 de 2020</span>
+            </div>
+            <div class="option" onclick="selectOption(this, 2, 'C')">
+                <div class="option-circle"></div>
+                <span>Acuerdo 01 de 2025</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer" id="quizFooter">
+        <div style="color: var(--text-muted); font-size: 14px;">Pregunta <span id="currentStep">1</span> de 2</div>
+        <button class="btn-next" id="nextBtn" onclick="nextQuestion()" disabled>Continuar</button>
+    </div>
+
+    <!-- Resultados -->
+    <div class="results-screen" id="resultsScreen">
+        <div class="score-circle">
+            <div class="score-num" id="finalScore">0.0</div>
+            <div class="score-label">Nota</div>
+        </div>
+        
+        <div id="statusBadge" class="status-badge">ESTADO</div>
+        
+        <div class="feedback-box" id="resultFeedback">
+            <!-- Feedback dinámico -->
+        </div>
+
+        <button class="btn-next" onclick="location.reload()">Reintentar Evaluación</button>
+    </div>
+</div>
+
+<script>
+    let currentQuestion = 1;
+    let answers = { 1: null, 2: null };
+    const correctAnswers = { 1: 'B', 2: 'C' };
+
+    function selectOption(el, question, value) {
+        // Deselect others in the same card
+        const card = document.getElementById(`q${question}`);
+        card.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+        
+        // Select this one
+        el.classList.add('selected');
+        answers[question] = value;
+        
+        document.getElementById('nextBtn').disabled = false;
+    }
+
+    function nextQuestion() {
+        if (currentQuestion < 2) {
+            document.getElementById(`q${currentQuestion}`).classList.remove('active');
+            currentQuestion++;
+            document.getElementById(`q${currentQuestion}`).classList.add('active');
+            document.getElementById('currentStep').textContent = currentQuestion;
+            document.getElementById('nextBtn').disabled = true;
+            document.getElementById('nextBtn').textContent = 'Finalizar';
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        document.getElementById('q2').classList.remove('active');
+        document.getElementById('scenarioBox').style.display = 'none';
+        document.getElementById('quizFooter').style.display = 'none';
+        
+        const resultsScreen = document.getElementById('resultsScreen');
+        resultsScreen.style.display = 'block';
+
+        let score = 0;
+        if (answers[1] === correctAnswers[1]) score += 5;
+        if (answers[2] === correctAnswers[2]) score += 5;
+
+        const finalScore = score.toFixed(1);
+        document.getElementById('finalScore').textContent = finalScore;
+
+        const badge = document.getElementById('statusBadge');
+        const feedback = document.getElementById('resultFeedback');
+
+        if (score >= 8.0) {
+            badge.textContent = 'APROBADO CON DISTINCIÓN';
+            badge.className = 'status-badge status-pass';
+            feedback.innerHTML = `<strong>¡Felicidades, Líder Estratégico!</strong><br><br>Has demostrado un dominio claro del ecosistema de calidad 2025. Identificas correctamente al <strong>CNA</strong> como el organismo técnico evaluador y al <strong>Acuerdo 01 de 2025</strong> como la brújula para las Unidades Académicas. Estás listo para avanzar al Módulo 2.`;
+        } else {
+            badge.textContent = 'REQUIERE REFUERZO';
+            badge.className = 'status-badge status-fail';
+            feedback.innerHTML = `<strong>Análisis de resultados:</strong><br><br>Tu puntaje de ${finalScore} es inferior al mínimo de 8.0 exigido para la certificación de experto. <br><br>Recordatorio clave: La acreditación de Unidades es coordinada por el <strong>CNA</strong> bajo el nuevo <strong>Acuerdo 01 de 2025</strong>. Te sugerimos revisar nuevamente el video introductorio y la presentación del SNA.`;
+        }
+    }
+</script>
+
+</body>
+</html>
