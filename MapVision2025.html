@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Micro-app: Map-Visión 2025</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #f2c314;
+            --accent: #6366f1;
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text: #f1f5f9;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            color: var(--text);
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .map-container {
+            position: relative;
+            width: 1000px;
+            height: 600px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .node {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background: var(--card-bg);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(10px);
+            z-index: 2;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+
+        .node:hover {
+            transform: scale(1.1);
+            border-color: var(--primary);
+            box-shadow: 0 0 30px rgba(242, 195, 20, 0.3);
+        }
+
+        .node.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 40px rgba(242, 195, 20, 0.5);
+        }
+
+        .node-label {
+            font-weight: 700;
+            font-size: 14px;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .node-icon {
+            position: absolute;
+            top: -15px;
+            font-size: 24px;
+        }
+
+        /* Positions */
+        #node-cesu { top: 50px; left: 440px; border-color: #ef4444; }
+        #node-cna { top: 250px; left: 200px; border-color: #f2c314; }
+        #node-men { top: 250px; left: 680px; border-color: #10b981; }
+        #node-ies { top: 450px; left: 440px; border-color: #6366f1; }
+
+        /* Lines */
+        svg.connections {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        line {
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 2;
+            stroke-dasharray: 5, 5;
+            animation: dash 20s linear infinite;
+        }
+
+        @keyframes dash {
+            to { stroke-dashoffset: -100; }
+        }
+
+        /* Detail Card */
+        .info-panel {
+            position: absolute;
+            right: 40px;
+            top: 40px;
+            width: 320px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(20px);
+            transform: translateX(400px);
+            transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+            z-index: 10;
+        }
+
+        .info-panel.visible {
+            transform: translateX(0);
+        }
+
+        .info-header {
+            color: var(--primary);
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-body {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #cbd5e1;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 10px;
+            background: rgba(242, 195, 20, 0.1);
+            color: var(--primary);
+            border-radius: 5px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .expert-tip {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 12px;
+            border-left: 3px solid var(--accent);
+            font-style: italic;
+            font-size: 13px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            cursor: pointer;
+            color: #94a3b8;
+        }
+
+        .title-app {
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            z-index: 5;
+        }
+
+        .title-app h2 {
+            margin: 0;
+            color: var(--primary);
+            font-size: 32px;
+        }
+        
+        .title-app p {
+            margin: 5px 0 0;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="title-app">
+    <h2>Map-Visión 2025</h2>
+    <p>Arquitectura del Sistema Nacional de Acreditación</p>
+</div>
+
+<div class="map-container">
+    <svg class="connections">
+        <line x1="500" y1="110" x2="260" y2="310" /> <!-- CESU -> CNA -->
+        <line x1="500" y1="110" x2="740" y2="310" /> <!-- CESU -> MEN -->
+        <line x1="260" y1="310" x2="740" y2="310" /> <!-- CNA <-> MEN -->
+        <line x1="260" y1="310" x2="500" y2="510" /> <!-- CNA -> IES -->
+        <line x1="740" y1="310" x2="500" y2="510" /> <!-- MEN -> IES -->
+    </svg>
+
+    <div class="node" id="node-cesu" onclick="showInfo('cesu')">
+        <div class="node-icon">⚖️</div>
+        <div class="node-label">CESU</div>
+    </div>
+
+    <div class="node" id="node-cna" onclick="showInfo('cna')">
+        <div class="node-icon">🔍</div>
+        <div class="node-label">CNA</div>
+    </div>
+
+    <div class="node" id="node-men" onclick="showInfo('men')">
+        <div class="node-icon">🏛️</div>
+        <div class="node-label">MEN</div>
+    </div>
+
+    <div class="node" id="node-ies" onclick="showInfo('ies')">
+        <div class="node-icon">🚀</div>
+        <div class="node-label">UA / IES</div>
+    </div>
+
+    <div class="info-panel" id="infoPanel">
+        <div class="close-btn" onclick="hideInfo()">✕</div>
+        <div class="tag" id="panelTag">POLÍTICA PÚBLICA</div>
+        <div class="info-header" id="panelTitle">CESU</div>
+        <div class="info-body" id="panelBody">
+            Contenido aquí...
+        </div>
+        <div class="expert-tip" id="panelTip">
+            Contenido experto aquí...
+        </div>
+    </div>
+</div>
+
+<script>
+    const content = {
+        cesu: {
+            title: 'CESU',
+            tag: 'POLÍTICA PÚBLICA',
+            body: 'Consejo Superior de Educación Superior. Es el organismo encargado de proponer la política pública y expedir la normatividad general. <strong>Logro 2025:</strong> Acuerdo 01 de 2025.',
+            tip: 'Para el experto: El CESU no evalúa su programa, pero define LOS CRITERIOS en los que usted se basa para autoevaluarse.'
+        },
+        cna: {
+            title: 'CNA',
+            tag: 'ALTA CALIDAD',
+            body: 'Consejo Nacional de Acreditación. Organismo técnico encargado de la evaluación externa. Coordina a los pares académicos y emite el concepto técnico de acreditación.',
+            tip: 'Ojo: Su informe de autoevaluación es el principal insumo para el CNA. Debe ser honesto y basado en evidencias SIAC.'
+        },
+        men: {
+            title: 'MEN',
+            tag: 'GOBIERNO',
+            body: 'Ministerio de Educación Nacional. Es la autoridad que firma las Resoluciones de acreditación. Traduce la recomendación técnica del CNA en un acto administrativo legal.',
+            tip: 'Estratégico: El MEN ahora utiliza el Modelo de Confianza (D529/24) para dar celeridad a los trámites administrativos.'
+        },
+        ies: {
+            title: 'UA / IES',
+            tag: 'EJECUCIÓN',
+            body: 'Unidad Académica o Institución. Es el corazón del sistema. Ejecuta la autoevaluación, genera la cultura de la calidad y garantiza la mejora continua permanente.',
+            tip: 'Nueva visión: Ya no acreditamos solo programas; la Unidad Académica es el nuevo eje de eficiencia organizacional.'
+        }
+    };
+
+    function showInfo(id) {
+        const panel = document.getElementById('infoPanel');
+        const data = content[id];
+
+        document.getElementById('panelTitle').textContent = data.title;
+        document.getElementById('panelTag').textContent = data.tag;
+        document.getElementById('panelBody').innerHTML = data.body;
+        document.getElementById('panelTip').textContent = data.tip;
+
+        // Reset nodes
+        document.querySelectorAll('.node').forEach(n => n.classList.remove('active'));
+        document.getElementById(`node-${id}`).classList.add('active');
+
+        panel.classList.add('visible');
+    }
+
+    function hideInfo() {
+        document.getElementById('infoPanel').classList.remove('visible');
+        document.querySelectorAll('.node').forEach(n => n.classList.remove('active'));
+    }
+</script>
+
+</body>
+</html>
